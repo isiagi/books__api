@@ -12,23 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv_1 = __importDefault(require("dotenv"));
-// import Book from "../models/bookModel"
-// import {data} from '../../utils/utils'
-dotenv_1.default.config();
-const mongoose_1 = require("mongoose");
-const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
+exports.authenticationMiddleware = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const authenticationMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const authHeaders = req.headers.authorization;
+    let token = "";
+    if (!authHeaders || !authHeaders.startsWith("Bearer ")) {
+        return res.status(400).json({ message: "Invalid authorizatio" });
+    }
+    token = authHeaders.split(" ")[1];
     try {
-        yield (0, mongoose_1.connect)(process.env.remoteDB);
-        console.log('DB connection established');
-        // await Book.deleteMany(); // removing all previous data (if any) (Never use this in production)
-        // const dataz = await Book.insertMany(data);
-        // console.log(dataz);
+        const decode = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const { id } = decode;
+        req.user = { id };
+        next();
     }
     catch (error) {
-        console.log('Error connecting', error.message);
+        res.status(400).json({ message: error });
     }
-    const db = mongoose_1.connect;
-    return db;
 });
-exports.default = connectDB;
+exports.authenticationMiddleware = authenticationMiddleware;
