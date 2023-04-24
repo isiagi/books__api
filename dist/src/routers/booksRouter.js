@@ -9,5 +9,6 @@ const router = express_1.default.Router();
 router.route('/').get(booksController_1.default.getAllBooks);
 router.route('/create').post(booksController_1.default.createBook);
 router.route('/:id').get(booksController_1.default.bookById);
+router.route('/query/:bookquery').get(booksController_1.default.getAllBooksByAuthorOrId);
 router.route('/delete/:id').delete(booksController_1.default.deleteBook);
 exports.default = router;

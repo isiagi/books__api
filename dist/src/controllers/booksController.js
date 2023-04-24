@@ -13,11 +13,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bookModel_1 = __importDefault(require("../models/bookModel"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const booksController = {
     getAllBooks: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const books = yield bookModel_1.default.find();
-            res.status(200).json({ data: books });
+            res.status(200).json(books);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }),
+    getAllBooksByAuthorOrId: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const books = yield bookModel_1.default.find({ $or: [{ author: { $regex: req.params.bookquery, $options: "i" } }, { title: { $regex: req.params.bookquery, $options: "i" } }] });
+            res.status(200).json(books);
         }
         catch (error) {
             console.log(error);
@@ -27,7 +37,9 @@ const booksController = {
         try {
             const createBook = yield bookModel_1.default.create(req.body);
             yield createBook.save();
-            res.status(200).json({ data: `Book with title ${createBook.title} created` });
+            res
+                .status(200)
+                .json({ data: `Book with title ${createBook.title} created` });
         }
         catch (error) {
             console.log(error);
@@ -36,14 +48,14 @@ const booksController = {
     bookById: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { id } = req.params;
-            // if (!mongoose.Types.ObjectId.isValid(id)) {
-            //   return res.status(400).json({ message: "Invalid Book ID" });
-            // }
-            const book = yield bookModel_1.default.findOne({ _id: id });
-            if (book === null) {
-                return res.status(400).json({ message: "Book Not Found" });
+            if (mongoose_1.default.Types.ObjectId.isValid(id)) {
+                const book = yield bookModel_1.default.findById(id);
+                if (book === null) {
+                    return res.status(400).json({ message: "Book Not Found!" });
+                }
+                return res.status(200).json(book);
             }
-            res.status(200).json({ data: book });
+            return res.status(400).json({ message: "Invalid Book ID" });
         }
         catch (error) {
             res.status(500).json({ error });

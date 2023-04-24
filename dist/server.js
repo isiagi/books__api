@@ -15,9 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const booksRouter_1 = __importDefault(require("./src/routers/booksRouter"));
 const orderRouter_1 = __importDefault(require("./src/routers/orderRouter"));
+const userRouter_1 = __importDefault(require("./src/routers/userRouter"));
 const connect_1 = __importDefault(require("./src/db/connect"));
+const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use('/api/v1/auth/', userRouter_1.default);
 app.use('/api/v1/book/', booksRouter_1.default);
 app.use('/api/v1/order/', orderRouter_1.default);
 app.get('/', (req, res) => {
