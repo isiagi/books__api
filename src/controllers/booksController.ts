@@ -6,7 +6,16 @@ const booksController = {
   getAllBooks: async (req: Request, res: Response) => {
     try {
       const books = await Book.find();
-      res.status(200).json({ data: books });
+      res.status(200).json(books);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  getAllBooksByAuthorOrId: async (req: Request, res: Response) => {
+    try {
+      const books = await Book.find({$or:[{ author: { $regex: req.params.bookquery, $options: "i" } },{ title: { $regex: req.params.bookquery, $options: "i" } }]});
+
+      res.status(200).json(books);
     } catch (error) {
       console.log(error);
     }
@@ -17,26 +26,28 @@ const booksController = {
 
       await createBook.save();
 
-      res.status(200).json({ data: `Book with title ${createBook.title} created` });
+      res
+        .status(200)
+        .json({ data: `Book with title ${createBook.title} created` });
     } catch (error) {
       console.log(error);
     }
   },
   bookById: async (req: Request, res: Response) => {
-
-    
     try {
       const { id } = req.params;
-      // if (!mongoose.Types.ObjectId.isValid(id)) {
-      //   return res.status(400).json({ message: "Invalid Book ID" });
-      // }
-      const book = await Book.findOne({_id:id});
+      if (mongoose.Types.ObjectId.isValid(id)) {
 
-      if (book === null) {
-        return res.status(400).json({ message: "Book Not Found" });
+        const book = await Book.findById(id);
+
+        if (book === null) {
+          return res.status(400).json({ message: "Book Not Found!" });
+        }
+
+        return res.status(200).json(book);
       }
 
-      res.status(200).json({ data: book });
+      return res.status(400).json({ message: "Invalid Book ID" });
     } catch (error) {
       res.status(500).json({ error });
     }

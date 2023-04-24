@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 interface IBook {
   title: string;
@@ -8,14 +8,19 @@ interface IBook {
   genre: Array<string>;
 }
 
-const bookSchema = new Schema<IBook>({
-  title: { type: "string", required: true },
-  author: { type: "string", required: true },
-  description: { type: "string", required: true },
-  imageUrl: { type: "string" },
-  genre: { type: [] },
+const bookSchema = new Schema({
+  author: { type: String, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  imageUrl: { type: String },
+  genre: { type: [String] },
 });
 
-const Book = model<IBook>("Book", bookSchema);
+bookSchema.index({
+  author: "text",
+  title: "text"
+});
+
+const Book = mongoose.model("Book", bookSchema);
 
 export default Book;
