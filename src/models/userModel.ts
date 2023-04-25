@@ -1,10 +1,10 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from 'bcryptjs';
-import JWT from 'jsonwebtoken';
+import bcrypt from "bcryptjs";
+import JWT from "jsonwebtoken";
 
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
 
-dotenv.config()
+dotenv.config();
 
 const userSchema = new Schema({
   username: String,
@@ -21,6 +21,10 @@ const userSchema = new Schema({
       "Please provide valid email",
     ],
   },
+  isAdmin: {
+    type: "Boolean",
+    default: false,
+  },
   passwordResetToken: String,
   resetPasswordExpire: Date,
 });
@@ -34,18 +38,21 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-userSchema.methods.matchPassword = async function (password:string) {
+userSchema.methods.matchPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.getSignedJwtToken = async function () {
-  const jk = (process.env.JWT_EXPIRATION);
-  
-  return JWT.sign({ id: this._id }, process.env.JWT_SECRET as string, {
-    expiresIn: 7000,
-  });
-};
+  const jk = process.env.JWT_EXPIRATION;
 
+  return JWT.sign(
+    { id: this._id, role: this.isAdmin },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: 7000,
+    }
+  );
+};
 
 const userModel = mongoose.model("User", userSchema);
 

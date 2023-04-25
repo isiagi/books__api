@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import { Request, Response } from "express";
 import Book from "../models/bookModel";
 import mongoose from "mongoose";
@@ -13,7 +15,12 @@ const booksController = {
   },
   getAllBooksByAuthorOrId: async (req: Request, res: Response) => {
     try {
-      const books = await Book.find({$or:[{ author: { $regex: req.params.bookquery, $options: "i" } },{ title: { $regex: req.params.bookquery, $options: "i" } }]});
+      const books = await Book.find({
+        $or: [
+          { author: { $regex: req.params.bookquery, $options: "i" } },
+          { title: { $regex: req.params.bookquery, $options: "i" } },
+        ],
+      });
 
       res.status(200).json(books);
     } catch (error) {
@@ -21,6 +28,12 @@ const booksController = {
     }
   },
   createBook: async (req: Request, res: Response) => {
+    if (req.user.role === false) {
+      return res
+        .status(400)
+        .json({ message: `Only Admins can perform this task` });
+    }
+
     try {
       const createBook = await Book.create(req.body);
 
@@ -37,7 +50,6 @@ const booksController = {
     try {
       const { id } = req.params;
       if (mongoose.Types.ObjectId.isValid(id)) {
-
         const book = await Book.findById(id);
 
         if (book === null) {
@@ -53,6 +65,12 @@ const booksController = {
     }
   },
   deleteBook: async (req: Request, res: Response) => {
+    if (req.user.role === false) {
+      return res
+        .status(400)
+        .json({ message: `Only Admins can perform this task` });
+    }
+
     try {
       const { id } = req.params;
       const deletedBook = await Book.findByIdAndDelete(id);

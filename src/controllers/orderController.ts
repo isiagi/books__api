@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import { Request, Response } from "express";
 import Order from "../models/orderModel";
 import { log } from "console";
@@ -5,20 +7,38 @@ import { log } from "console";
 const orderController = {
   getOrders: async (req: Request, res: Response) => {
     try {
-      const orders = await Order.find();
+      let orders;
+      if (req.user.role === true) {
+        orders = await Order.find()
+          .populate({
+            path: "bookId",
+          })
+          .populate({ path: "userId", select: "_id email" });
+      }
+
+      orders = await Order.find({ userId: req.user.id })
+        .populate({
+          path: "bookId",
+        })
+        .populate({ path: "userId", select: "_id email" });
+
       res.status(200).json({ data: orders });
     } catch (error) {
-        log(error)
+      log(error);
       res.status(500).json({ error });
     }
   },
   createOrder: async (req: Request, res: Response) => {
     try {
-        const userOrders = await Order.findOne({userId: req.body.userId})
-      const createOrder = await Order.create(req.body);
+      // const userOrders = await Order.findOne({userId: req.body.userId})
+
+      const createOrder = await new Order(req.body);
+
+      createOrder.userId = req.user.id;
 
       await createOrder.save();
-      res.status(200).json({ success: userOrders });
+
+      res.status(200).json({ success: createOrder });
     } catch (error) {
       res.status(500).json({ error });
     }
@@ -26,10 +46,12 @@ const orderController = {
   getOrderById: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const order = await Order.findById(id).populate({
-        path: 'bookId',
-        
-      }).exec();
+      const order = await Order.findById(id)
+        .populate({
+          path: "bookId",
+        })
+        .populate({ path: "userId", select: "_id email" });
+
       res.status(200).json({ data: order });
     } catch (error) {
       res.status(500).json({ error });
