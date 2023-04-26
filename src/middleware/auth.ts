@@ -20,8 +20,8 @@ export const authenticationMiddleware = async (
 
   try {
     const decode: any = JWT.verify(token, process.env.JWT_SECRET as string);
-    const { id } = decode;
-    req.user = { id };
+    const { id, role } = decode;
+    req.user = { id, role };
     next();
   } catch (error) {
     res.status(400).json({ message: error });

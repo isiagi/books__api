@@ -18,7 +18,7 @@ app.use('/api/v1/book/', booksRouter)
 app.use('/api/v1/order/', ordersRouter)
 
 app.get('/', (req:Request, res:Response) => {
-    res.send('Express + TypeScript Server,there');
+    res.send('Welcome To BookShop API');
 })
 
 const PORT = process.env.PORT || 5000;

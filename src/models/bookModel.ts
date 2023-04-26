@@ -13,12 +13,14 @@ const bookSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   imageUrl: { type: String },
-  genre: { type: [String] },
+  genre: { type: Array, items: String },
+  price: { type: Number, required: true },
+  qty: { type: Number, required: true },
 });
 
 bookSchema.index({
   author: "text",
-  title: "text"
+  title: "text",
 });
 
 const Book = mongoose.model("Book", bookSchema);
