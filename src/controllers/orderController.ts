@@ -11,14 +11,14 @@ const orderController = {
       if (req.user.role === true) {
         orders = await Order.find()
           .populate({
-            path: "bookId",
+            path: "books.bookId",
           })
           .populate({ path: "userId", select: "_id email" });
       }
 
       orders = await Order.find({ userId: req.user.id })
         .populate({
-          path: "bookId",
+          path: "books.bookId",
         })
         .populate({ path: "userId", select: "_id email" });
 
@@ -28,27 +28,38 @@ const orderController = {
       res.status(500).json({ error });
     }
   },
-  createOrder: async (req: Request, res: Response) => {
+  createOrder: (req, res) => {
     try {
-      // const userOrders = await Order.findOne({userId: req.body.userId})
+      const { cartItems } = req.body;
 
-      const createOrder = await new Order(req.body);
+      let totalPrice = 0;
+      const books = [];
 
-      createOrder.userId = req.user.id;
+      cartItems.forEach((item) => {
+        books.push({ bookId: item._id, qty: item.qty });
+        totalPrice += item.price * item.qty;
+      });
 
-      await createOrder.save();
+      const createOrder = new Order({
+        userId: req.user.id,
+        books: books,
+        totalPrice: totalPrice,
+      });
 
-      res.status(200).json({ success: createOrder });
+      createOrder.save();
+
+      res.status(201).send(createOrder);
     } catch (error) {
-      res.status(500).json({ error });
+      res.status(500).send({ message: "Error in creating order" });
     }
   },
+
   getOrderById: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const order = await Order.findById(id)
         .populate({
-          path: "bookId",
+          path: "books.bookId",
         })
         .populate({ path: "userId", select: "_id email" });
 
