@@ -35,7 +35,17 @@ const booksController = {
     }
 
     try {
-      const createBook = await Book.create(req.body);
+      const {title, author,description, imageUrl, genre, price} = req.body;
+
+      const createBook = new Book({
+        title: title,
+        author:author,
+        description: description,
+        imageUrl: imageUrl,
+        genre: genre,
+        price: price,
+        qty: 1
+    });
 
       await createBook.save();
 

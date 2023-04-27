@@ -14,8 +14,8 @@ const bookSchema = new Schema({
   description: { type: String, required: true },
   imageUrl: { type: String },
   genre: { type: Array, items: String },
-  price: { type: Number, required: true },
-  qty: { type: Number, required: true },
+  price: { type: String, required: true },
+  qty: { type: String, required: true },
 });
 
 bookSchema.index({

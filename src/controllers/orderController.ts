@@ -14,13 +14,13 @@ const orderController = {
             path: "books.bookId",
           })
           .populate({ path: "userId", select: "_id email" });
+      } else {
+        orders = await Order.find({ userId: req.user.id })
+          .populate({
+            path: "books.bookId",
+          })
+          .populate({ path: "userId", select: "_id email" });
       }
-
-      orders = await Order.find({ userId: req.user.id })
-        .populate({
-          path: "books.bookId",
-        })
-        .populate({ path: "userId", select: "_id email" });
 
       res.status(200).json({ data: orders });
     } catch (error) {
