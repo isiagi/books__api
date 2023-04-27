@@ -8,7 +8,7 @@ import {connect} from 'mongoose';
 
 const connectDB = async () => {
     try {
-      await connect(process.env.localDB as string);
+      await connect(process.env.remoteDB as string);
       console.log('DB connection established');
 
     // await Book.deleteMany(); // removing all previous data (if any) (Never use this in production)
